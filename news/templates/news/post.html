@@ -1,0 +1,19 @@
+<!--  наследуемся от шаблона default.html -->
+{% extends 'default.html' %}
+
+{% load own_filters %}
+
+<!-- Название страницы в теге title -->
+{% block title %}
+Post
+{% endblock title %}
+
+<!-- Здесь формируется контент страницы для записи, идентификатор которой был передан в url -->
+{% block content %}
+<h1>{{ post.title|censor }}</h1>
+<i>{{ post.dateCreation|date:'d.m.Y H:i:s' }}</i>
+<hr>
+<p>
+    {{ post.text|censor }}
+</p>
+{% endblock content %}

@@ -1,0 +1,37 @@
+<!--  наследуемся от шаблона default.html -->
+{% extends 'default.html' %}
+
+{% load own_filters %}
+
+<!-- Название страницы в теге title -->
+{% block title %}
+Posts
+{% endblock title %}
+
+<!-- Здесь формируется контент страницы на основе полученного QuerySet-->
+{% block content %}
+<h1>Новости</h1>
+<h3>{{ time_now|date:'d.m.Y' }}</h3>
+<i>{{ posts|length }}</i>
+<hr>
+{% if posts %}
+    <table>
+        <tr>
+            <th>Заголовок</th>
+            <th>Дата публикации</th>
+            <th>Публикация</th>
+            <th>Рейтинг</th>
+        </tr>
+        {% for post in posts %}
+        <tr>
+            <td><a href="{{ post.pk }}">{{ post.title|truncatechars:80|censor }}</a></td>
+            <td>{{ post.dateCreation|date:'d.m.Y' }}</td>
+            <td>{{ post.text|truncatewords:20|censor }}</td>
+            <td>{{ post.rating }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <h2>Публикаций нет!</h2>
+{% endif %}
+{% endblock content %}

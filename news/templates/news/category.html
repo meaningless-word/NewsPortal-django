@@ -1,0 +1,12 @@
+<!--  наследуемся от шаблона default.html -->
+{% extends 'default.html' %}
+
+<!-- Название страницы в теге title -->
+{% block title %}
+Category
+{% endblock title %}
+
+<!-- Здесь формируется контент страницы для записи, идентификатор которой был передан в url -->
+{% block content %}
+<h1>{{ category }}</h1>
+{% endblock content %}

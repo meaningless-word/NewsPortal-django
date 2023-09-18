@@ -1,0 +1,13 @@
+<!--  наследуемся от шаблона default.html -->
+{% extends 'default.html' %}
+
+<!-- Название страницы в теге title -->
+{% block title %}
+Categories
+{% endblock title %}
+
+<!-- Здесь формируется контент страницы на основе полученного QuerySet-->
+{% block content %}
+<h1>Категории</h1>
+{{ categories }}
+{% endblock content %}

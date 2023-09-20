@@ -1,0 +1,123 @@
+1. Создать двух пользователей (с помощью метода User.objects.create_user('username')).
+>>> u1 = User.objects.create_user(username='LongPostWriter', first_name='Писака')
+>>> u2 = User.objects.create_user(username='PaperDamager', first_name='Бумагомарака')
+добавлены дополнительный пользователи в качестве комментаторов
+>>> uc1 = User.objects.create_user(username='Wicked', first_name='Злой')
+>>> uc2 = User.objects.create_user(username='Kind', first_name='Добрый')
+>>> uc3 = User.objects.create_user(username='Paid', first_name='Проплаченный')
+
+
+2. Создать два объекта модели Author, связанные с пользователями.
+авторы шедевров среди пользователей ресурса
+>>> a1 = Author.objects.create(user=u1)
+>>> a2 = Author.objects.create(user=u2)
+авторы комментариев среди пользователей ресурса
+>>> a3 = Author.objects.create(user=uc1)
+>>> a4 = Author.objects.create(user=uc2)
+>>> a5 = Author.objects.create(user=uc3)
+
+
+3. Добавить 4 категории в модель Category.
+>>> c1 = Category.objects.create(name='о том, о сём')
+>>> c2 = Category.objects.create(name='сплетни')
+>>> c3 = Category.objects.create(name='слухи')
+>>> c4 = Category.objects.create(name='домыслы')
+
+
+4. Добавить 2 статьи и 1 новость.
+>>> pn1 = Post.objects.create(author=a1, categoryType=Post.NEWS, title='горячая новость', text='новость эксклюзивная, остальные источники просто у нас копируют')
+>>> pa1 = Post.objects.create(author=a1, categoryType=Post.ARTICLE, title='статья прям огонь', text='статья от именитого автора, подтверждённая экспертным мнением')
+>>> pa2 = Post.objects.create(author=a2, categoryType=Post.ARTICLE, title='такая себе статейка', text='полная чушь с бредовой аналитикой')
+
+
+5. Присвоить им категории (как минимум в одной статье/новости должно быть не меньше 2 категорий).
+назначение категорий постам
+>>> pn1.categories.add(c1)
+>>> pa1.categories.add(Category.objects.get(name='о том, о сём'))
+назначение категории с одновременным её созданием
+>>> pn1.categories.add(Category.objects.create(name='журналистское расследование'))
+назначение группы категорий
+>>> pa2.categories.set([c2, c3, c4])
+
+
+6. Создать как минимум 4 комментария к разным объектам модели Post (в каждом объекте должен быть как минимум один комментарий).
+комментарии к новости
+>>> cm1 = Comment.objects.create(post=pn1, user=uc1, text='вы вообще значение слова "эксклюзив" знаете?')
+>>> cm2 = Comment.objects.create(post=pn1, user=uc2, text='новость - топчик')
+>>> cm3 = Comment.objects.create(post=pn1, user=u2, text='я бы лучше смог')
+к бездарной статье
+>>> cm4 = Comment.objects.create(post=a2.post_set.filter(categoryType = Post.ARTICLE).first(), user=uc3, text='гениально!')
+>>> cm5 = Comment.objects.create(post=pa2, user=User.objects.get(username='Kind'), text='следует поработать над стилем и подбором тем')
+>>> cm6 = Comment.objects.create(post=pa2, user=u1, text='поток объективной критики')
+к статье с экспертным мнением
+>>> cm8 = Comment.objects.create(post=pa1, user=uc1, text='этот вечно о своём')
+>>> cm9 = pa1.comment_set.create(user=uc2, text='чувствуется рука профессионала')
+
+
+7. Применяя функции like() и dislike() к статьям/новостям и комментариям, скорректировать рейтинги этих объектов.
+
+>>> pn1.like()
++1 к новости первого автора
+>>> a1.update_rating()
+3 - баллы за новость
+
+>>> pa1.like()
+можно и так - за новейшую публикацию автора
+>>> a1.post_set.all().order_by('-dateCreation').first().like()
++2 к статье первого автора
+>>> a1.update_rating()
+9 - 3 за новость и 2 * 3 за статью
+
+>>> a2.post_set.all().order_by('dateCreation').first().dislike()
+-1 за самую первую статью второго автора
+>>> a2.update_rating()
+-3 - баллы за статью
+
+у первого автора есть один комментарий, лайкнем его дважды
+>>> cm6.like()
+>>> cm6.like()
+>>> a1.update_rating()
+11 - +2 балла - по одному за каждый лайк на его комментарии
+
+лайкнем по одному комментарию к новости и статье первого автора
+>>> cm9.like()
+>>> cm2.like()
+>>> a1.update_rating()
+13 - +2 балла за каждый лайк под комментариями его публикаций
+
+пересчитаем рейтинг второго автора - он изменился благодаря двум лайкам за коммент первого автора
+>>> a2.update_rating()
+-1 - +2 балла к комментарию первого автора под публикацией второго автора (вот она несправедливость)
+
+пересчитаем рейтинги комментаторов
+>>> Author.objects.get(pk=3).update_rating()
+>>> Author.objects.get(pk=4).update_rating()
+>>> Author.objects.get(pk=5).update_rating()
+
+
+9. Вывести username и рейтинг лучшего пользователя (применяя сортировку и возвращая поля первого объекта).
+Author.objects.order_by('-rating').values('user__first_name', 'rating').first()
+{'user__first_name': 'Писака', 'rating': 13}
+
+
+10. Вывести дату добавления, username автора, рейтинг, заголовок и превью лучшей статьи, основываясь на лайках/дислайках к этой статье.
+>>> best_post = Post.objects.order_by('-rating').first()
+>>> best_post.author.user.username
+'LongPostWriter'
+>>> best_post.rating
+2
+>>> best_post.title
+'статья прям огонь'
+>>> best_post.preview()
+'статья от именитого автора, подтверждённ ... [2]'
+
+либо так, но без preview
+>>> Post.objects.order_by('-rating').values('author__user__username', 'rating', 'title', 'text').first()
+{'author__user__username': 'LongPostWriter', 'rating': 2, 'title': 'статья прям огонь', 'text': 'статья от именитого автора, подтверждённая экспертным мнением'}
+
+
+11. Вывести все комментарии (дата, пользователь, рейтинг, текст) к этой статье.
+>>> Post.objects.order_by('-rating').first().comment_set.all().values('dateCreation', 'user__first_name', 'rating', 'text')
+<QuerySet [{'dateCreation': datetime.datetime(2023, 9, 11, 4, 49, 8, 881242, tzinfo=datetime.timezone.utc), 'user__first_name': 'Злой', 'rating': 0, 'text': 'этот вечно о своём'}, {'dateCreation': datetime.datetime(2023, 9, 11, 4, 58, 47, 89258, tzinfo=datetime.timezone.utc), 'user__first_name': 'Добрый', 'rating': 1, 'text': 'чувствуется рука профессионала'}]>
+
+

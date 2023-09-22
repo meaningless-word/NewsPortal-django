@@ -11,12 +11,9 @@ Posts
 
 <!-- Здесь формируется контент страницы на основе полученного QuerySet-->
 {% block content %}
-<h1>Публикации</h1>
-<h3>{{ time_now|date:'d.m.Y' }}</h3>
-<hr>
 <form action="" method="get">
    {{ filterset.form.as_p }}
-   <input type="submit" value="Отобразить" />
+   <input type="submit" value="Найти" />
 </form>
 <hr>
 {% if posts %}
@@ -29,7 +26,7 @@ Posts
         </tr>
         {% for post in posts %}
         <tr>
-            <td><a href="{{ post.pk }}">{{ post.title|truncatechars:80|censor }}</a></td>
+            <td><a href="{% url 'post_detail' post.pk %}">{{ post.title|truncatechars:80|censor }}</a></td>
             <td>{{ post.dateCreation|date:'d.m.Y H:i' }}</td>
             <td>{{ post.text|truncatewords:20|censor }}</td>
             <td>{{ post.rating }}</td>
@@ -62,7 +59,5 @@ Posts
     <a href="?{% url_replace page=page_obj.paginator.num_pages %}">{{ page_obj.paginator.num_pages }}</a>
 {% endif %}
 <hr>
-<a href="search">поиск</a>
-<a href="{% url 'news_create' %}">добавить новость</a>
-<a href="{% url 'article_create' %}">добавить статью</a>
+<a href="{% url 'post_list' %}">к списку публикаций</a>
 {% endblock content %}

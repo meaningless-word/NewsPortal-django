@@ -1,0 +1,18 @@
+<!--  наследуемся от шаблона default.html -->
+{% extends 'default.html' %}
+
+<!-- Название страницы в теге title -->
+{% block title %}
+Post Editor
+{% endblock title %}
+
+<!-- Здесь формируется контент страницы на основе полученного QuerySet-->
+{% block content %}
+<h1>{{ cType }}</h1>
+<hr>
+<form action="" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Save"/>
+</form>
+{% endblock content %}

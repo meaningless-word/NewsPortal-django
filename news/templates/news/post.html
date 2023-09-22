@@ -16,4 +16,13 @@ Post
 <p>
     {{ post.text|censor }}
 </p>
+<a href="{% url 'post_list' %}">к списку публикаций</a>
+<hr>
+{% if post.categoryType == "NW" %}
+    <a href="{% url 'news_update' pk=post.id %}">редактировать</a>
+    <a href="{% url 'news_delete' pk=post.id %}">удалить</a>
+{% elif post.categoryType == "AR" %}
+    <a href="{% url 'article_update' pk=post.id %}">редактировать</a>
+    <a href="{% url 'article_delete' pk=post.id %}">удалить</a>
+{% endif %}
 {% endblock content %}

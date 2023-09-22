@@ -1,7 +1,10 @@
 from datetime import datetime
 
-from django.views.generic import ListView, DetailView
-from .models import Category, Post
+from django.urls import reverse_lazy
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from .models import Category, Post, Author
+from .filters import PostFilter, CategoryTypeFilter
+from .forms import PostForm
 
 
 class CategoriesListView(ListView):
@@ -29,10 +32,34 @@ class PostListView(ListView):
     ordering = '-dateCreation'
     template_name = 'news/posts.html'
     context_object_name = 'posts'
+    paginate_by = 6
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        self.filterset = CategoryTypeFilter(self.request.GET, queryset)
+        return self.filterset.qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['time_now'] = datetime.utcnow()
+        context['filterset'] = self.filterset
+        return context
+
+class PostSearchView(ListView):
+    model = Post
+    ordering = '-dateCreation'
+    template_name = 'news/post_search.html'
+    context_object_name = 'posts'
+    paginate_by = 6
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        self.filterset = PostFilter(self.request.GET, queryset)
+        return self.filterset.qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filterset'] = self.filterset
         return context
 
 
@@ -40,3 +67,51 @@ class PostDetailView(DetailView):
     model = Post
     template_name = 'news/post.html'
     context_object_name = 'post'
+
+
+class NewsPostCreate(CreateView):
+    form_class = PostForm
+    model = Post
+    template_name = 'news/post_edit.html'
+    categoryType = 'NW'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cType'] = dict(Post.CATEGORY_CHOICES)[self.categoryType]
+        return context
+
+    def form_valid(self, form):
+        post = form.save(commit=False)
+        post.categoryType = self.categoryType
+        post.author = Author.objects.first()
+        return super().form_valid(form)
+
+
+class PostUpdateView(UpdateView):
+    form_class = PostForm
+    model = Post
+    template_name = 'news/post_edit.html'
+
+
+class PostDeleteView(DeleteView):
+    model = Post
+    template_name = 'news/post_delete.html'
+    success_url = reverse_lazy('post_list')
+
+
+class ArticlePostCreate(CreateView):
+    form_class = PostForm
+    model = Post
+    template_name = 'news/post_edit.html'
+    categoryType = 'AR'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cType'] = dict(Post.CATEGORY_CHOICES)[self.categoryType]
+        return context
+
+    def form_valid(self, form):
+        post = form.save(commit=False)
+        post.categoryType = self.categoryType
+        post.author = Author.objects.first()
+        return super().form_valid(form)

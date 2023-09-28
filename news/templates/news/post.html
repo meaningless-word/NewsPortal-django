@@ -16,24 +16,37 @@ Post
 <p>
     {{ post.text|censor }}
 </p>
+
 <a href="{% url 'post_list' %}">к списку публикаций</a>
 <hr>
 {% if post.categoryType == "NW" %}
     {% if perms.news.change_post %}
-        <a href="{% url 'news_update' pk=post.id %}">редактировать</a>
-        {% if perms.news.delete_post %}
-            <a href="{% url 'news_delete' pk=post.id %}">удалить</a>
+        {% if user.username == post.author.user.username %}
+            <a href="{% url 'news_update' pk=post.id %}">редактировать</a>
+            {% if perms.news.delete_post %}
+                <a href="{% url 'news_delete' pk=post.id %}">удалить</a>
+            {% else %}
+                <span>для удаления обратитесь к администратору</span>
+            {% endif %}
         {% else %}
-            <span>для удаления обратитесь к администратору</span>
+            <p>
+                (c) by {{ post.author.user.username }}
+            </p>
         {% endif %}
     {% endif %}
 {% elif post.categoryType == "AR" %}
     {% if perms.news.change_post %}
-        <a href="{% url 'article_update' pk=post.id %}">редактировать</a>
-        {% if perms.news.delete_post %}
-            <a href="{% url 'article_delete' pk=post.id %}">удалить</a>
+        {% if user.username == post.author.user.username %}
+            <a href="{% url 'article_update' pk=post.id %}">редактировать</a>
+            {% if perms.news.delete_post %}
+                <a href="{% url 'article_delete' pk=post.id %}">удалить</a>
+            {% else %}
+                <span>для удаления обратитесь к администратору</span>
+            {% endif %}
         {% else %}
-            <span>для удаления обратитесь к администратору</span>
+            <p>
+                (c) by {{ post.author.user.username }}
+            </p>
         {% endif %}
     {% endif %}
 {% endif %}

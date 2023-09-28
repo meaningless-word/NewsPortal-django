@@ -13,6 +13,7 @@ Posts
 {% block content %}
 <h1>Публикации</h1>
 <h3>{{ time_now|date:'d.m.Y' }}</h3>
+<a href="accounts/logout">{{ user }}</a>
 <hr>
 <form action="" method="get">
    {{ filterset.form.as_p }}

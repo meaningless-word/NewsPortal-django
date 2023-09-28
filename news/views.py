@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Category, Post, Author
@@ -27,7 +28,8 @@ class CategoryDetailView(DetailView):
     context_object_name = 'category'
 
 
-class PostListView(ListView):
+class PostListView(LoginRequiredMixin, ListView):
+    raise_exception = False
     model = Post
     ordering = '-dateCreation'
     template_name = 'news/posts.html'
@@ -44,6 +46,7 @@ class PostListView(ListView):
         context['time_now'] = datetime.utcnow()
         context['filterset'] = self.filterset
         return context
+
 
 class PostSearchView(ListView):
     model = Post
@@ -69,7 +72,8 @@ class PostDetailView(DetailView):
     context_object_name = 'post'
 
 
-class NewsPostCreate(CreateView):
+class NewsPostCreate(PermissionRequiredMixin, CreateView):
+    permission_required = ('news.add_post',)
     form_class = PostForm
     model = Post
     template_name = 'news/post_edit.html'
@@ -87,19 +91,22 @@ class NewsPostCreate(CreateView):
         return super().form_valid(form)
 
 
-class PostUpdateView(UpdateView):
+class PostUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = ('news.change_post',)
     form_class = PostForm
     model = Post
     template_name = 'news/post_edit.html'
 
 
-class PostDeleteView(DeleteView):
+class PostDeleteView(PermissionRequiredMixin, DeleteView):
+    permission_required = ('news.delete_post',)
     model = Post
     template_name = 'news/post_delete.html'
     success_url = reverse_lazy('post_list')
 
 
-class ArticlePostCreate(CreateView):
+class ArticlePostCreate(PermissionRequiredMixin, CreateView):
+    permission_required = ('news.add_post',)
     form_class = PostForm
     model = Post
     template_name = 'news/post_edit.html'

@@ -63,6 +63,8 @@ Posts
 {% endif %}
 <hr>
 <a href="search">поиск</a>
-<a href="{% url 'news_create' %}">добавить новость</a>
-<a href="{% url 'article_create' %}">добавить статью</a>
+{% if perms.news.add_post %}
+    <a href="{% url 'news_create' %}">добавить новость</a>
+    <a href="{% url 'article_create' %}">добавить статью</a>
+{% endif %}
 {% endblock content %}

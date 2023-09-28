@@ -19,10 +19,22 @@ Post
 <a href="{% url 'post_list' %}">к списку публикаций</a>
 <hr>
 {% if post.categoryType == "NW" %}
-    <a href="{% url 'news_update' pk=post.id %}">редактировать</a>
-    <a href="{% url 'news_delete' pk=post.id %}">удалить</a>
+    {% if perms.news.change_post %}
+        <a href="{% url 'news_update' pk=post.id %}">редактировать</a>
+        {% if perms.news.delete_post %}
+            <a href="{% url 'news_delete' pk=post.id %}">удалить</a>
+        {% else %}
+            <span>для удаления обратитесь к администратору</span>
+        {% endif %}
+    {% endif %}
 {% elif post.categoryType == "AR" %}
-    <a href="{% url 'article_update' pk=post.id %}">редактировать</a>
-    <a href="{% url 'article_delete' pk=post.id %}">удалить</a>
+    {% if perms.news.change_post %}
+        <a href="{% url 'article_update' pk=post.id %}">редактировать</a>
+        {% if perms.news.delete_post %}
+            <a href="{% url 'article_delete' pk=post.id %}">удалить</a>
+        {% else %}
+            <span>для удаления обратитесь к администратору</span>
+        {% endif %}
+    {% endif %}
 {% endif %}
 {% endblock content %}

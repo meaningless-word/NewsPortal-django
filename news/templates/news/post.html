@@ -21,7 +21,7 @@ Post
 <hr>
 {% if post.categoryType == "NW" %}
     {% if perms.news.change_post %}
-        {% if user.username == post.author.user.username %}
+        {% if user.username == post.author.user.username or user.is_superuser == 1 %}
             <a href="{% url 'news_update' pk=post.id %}">редактировать</a>
             {% if perms.news.delete_post %}
                 <a href="{% url 'news_delete' pk=post.id %}">удалить</a>
@@ -36,7 +36,7 @@ Post
     {% endif %}
 {% elif post.categoryType == "AR" %}
     {% if perms.news.change_post %}
-        {% if user.username == post.author.user.username %}
+        {% if user.username == post.author.user.username or user.is_superuser == 1 %}
             <a href="{% url 'article_update' pk=post.id %}">редактировать</a>
             {% if perms.news.delete_post %}
                 <a href="{% url 'article_delete' pk=post.id %}">удалить</a>

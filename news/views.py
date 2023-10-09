@@ -1,7 +1,11 @@
 from datetime import datetime
 
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
+from django.db.models import Exists, OuterRef
+from django.shortcuts import render
 from django.urls import reverse_lazy
+from django.views.decorators.csrf import csrf_protect
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Category, Post, Author
 from .filters import PostFilter, CategoryTypeFilter
@@ -66,10 +70,42 @@ class PostSearchView(ListView):
         return context
 
 
-class PostDetailView(DetailView):
+class PostDetailView(LoginRequiredMixin, DetailView):
+    raise_exception = False
     model = Post
     template_name = 'news/post.html'
     context_object_name = 'post'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Post.objects.get(pk=self.kwargs['pk']).categories.all().annotate(
+            is_subscribed=Exists(self.request.user.categories.filter(id=OuterRef('pk')))
+        )
+        context['message'] = ''
+        return context
+
+    def post(self, request, *args, **kwargs):
+        category_id = request.POST.get('category_id')
+        category = Category.objects.get(id=category_id)
+        action = request.POST.get('action')
+        message = ''
+
+        if action == 'subscribe':
+            category.subscribers.add(request.user)
+            message = 'Подписка оформлена'
+        if action == 'unsubscribe':
+            category.subscribers.remove(request.user)
+            message = 'Подписка отменена'
+
+        context = {
+            'post': Post.objects.get(pk=self.kwargs['pk']),
+            'categories': Post.objects.get(pk=self.kwargs['pk']).categories.all().annotate(
+                is_subscribed=Exists(self.request.user.categories.filter(id=OuterRef('pk')))
+            ),
+            'message': message,
+        }
+
+        return render(request, self.template_name, context)
 
 
 class NewsPostCreate(PermissionRequiredMixin, CreateView):
@@ -122,3 +158,23 @@ class ArticlePostCreate(PermissionRequiredMixin, CreateView):
         post.categoryType = self.categoryType
         post.author = Author.objects.first()
         return super().form_valid(form)
+
+
+@login_required
+@csrf_protect
+def subscriptions(request):
+    if request.method == 'POST':
+        category_id = request.POST.get('category_id')
+        category = Category.objects.get(id=category_id)
+        action = request.POST.get('action')
+
+        if action == 'subscribe':
+            category.subscribers.add(request.user)
+        if action == 'unsubscribe':
+            category.subscribers.remove(request.user)
+
+    categories_with_subscriptions = Category.objects.annotate(
+            is_subscribed=Exists(request.user.categories.filter(id=OuterRef('pk')))
+        ).order_by('name')
+
+    return render(request, 'news/subscriptions.html', {'categories': categories_with_subscriptions},)

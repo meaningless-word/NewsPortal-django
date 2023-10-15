@@ -6,6 +6,7 @@ from django.template.loader import render_to_string
 
 import config.settings as settings
 from news.models import PostCategory, Post
+from news.tasks import task_notification
 
 
 def send_notification(post, subscribers):
@@ -35,7 +36,8 @@ def post_category_after_change(sender, instance, **kwargs):
         # subscribers = [s.email for c in instance.categories.all() for s in c.subscribers.all()]
         subscribers = User.objects.filter(categories__in=instance.categories.all()).values_list('email', flat=True)
 
-        send_notification(instance, subscribers)
+        # send_notification(instance, subscribers)
+        task_notification.delay(instance.id)  # подготовка писем и рассылка переносится в таски
 
 
 @receiver(post_save, sender=Post)

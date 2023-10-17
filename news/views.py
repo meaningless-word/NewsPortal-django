@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
+from django.core.cache import cache
 from django.db.models import Exists, OuterRef
 from django.shortcuts import render
 from django.urls import reverse_lazy
@@ -106,6 +107,16 @@ class PostDetailView(LoginRequiredMixin, DetailView):
         }
 
         return render(request, self.template_name, context)
+
+    def get_object(self, *args, **kwargs):
+        obj = cache.get(f'post-{self.kwargs["pk"]}', None)  # кэш похож на словарь и метод get действует так же: забирает значение по ключу, а если его нет, то None
+
+        # если объекта нет в кэше, то получаем его и записываем в кэш
+        if not obj:
+            obj = super().get_object(queryset=self.queryset)
+            cache.set(f'post-{self.kwargs["pk"]}', obj)
+
+        return obj
 
 
 class NewsPostCreate(PermissionRequiredMixin, CreateView):

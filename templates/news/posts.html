@@ -14,12 +14,15 @@ Posts
 <h1>Публикации</h1>
 <h3>{{ time_now|date:'d.m.Y' }}</h3>
 <a href="accounts/logout">{{ user }}</a>
+{% load cache %}
+{% cache 300 switch %}
 <hr>
 <form action="" method="get">
    {{ filterset.form.as_p }}
    <input type="submit" value="Отобразить" />
 </form>
 <hr>
+{% endcache %}
 {% if posts %}
     <table>
         <tr>

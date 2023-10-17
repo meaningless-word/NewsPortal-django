@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum
@@ -75,6 +76,10 @@ class Post(models.Model):
 
     def get_absolute_url(self):
         return reverse_lazy('post_detail', args=[str(self.id)])
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # сначала вызовем метод родителя, чтобы объект сохранился
+        cache.delete(f'post-{self.pk}')  # затем удалим из кэша, чтобы сбросить
 
 
 class PostCategory(models.Model):

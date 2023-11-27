@@ -217,7 +217,7 @@ LOGGING = {
             'handlers': ['console_debug', 'console_warning', 'console_error', 'file_info', 'file_error', 'file_security', 'mail_error'],
         },
         'django': {
-            'level': 'DEBUG',  # здесь включить DEBUG
+            'level': 'DEBUG',
             'handlers': ['console_debug', 'console_warning', 'file_info'],
         },
         'django.request': {

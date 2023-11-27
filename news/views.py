@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
 from django.core.cache import cache
 from django.db.models import Exists, OuterRef
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_protect
@@ -11,6 +12,9 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from .models import Category, Post, Author
 from .filters import PostFilter, CategoryTypeFilter
 from .forms import PostForm
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 class CategoriesListView(ListView):
@@ -189,3 +193,28 @@ def subscriptions(request):
         ).order_by('name')
 
     return render(request, 'news/subscriptions.html', {'categories': categories_with_subscriptions},)
+
+
+def debug_generator(request):
+    logger.debug('Debug page was accessed at '+str(datetime.now())+' hours!')
+    return HttpResponse("<h1>debug page generated)</h1>")
+
+
+def info_generator(request):
+    logger.info('Info page was accessed at '+str(datetime.now())+' hours!')
+    return HttpResponse("<h1>info page generated)</h1>")
+
+
+def warning_generator(request):
+    logger.warning('Warning page was accessed at '+str(datetime.now())+' hours!')
+    return HttpResponse("<h1>warning page generated)</h1>")
+
+
+def error_generator(request):
+    logger.error('Error page was accessed at '+str(datetime.now())+' hours!')
+    return HttpResponse("<h1>error page generated)</h1>")
+
+
+def critical_generator(request):
+    logger.critical('Critical page was accessed at '+str(datetime.now())+' hours!')
+    return HttpResponse("<h1>critical page generated)</h1>")

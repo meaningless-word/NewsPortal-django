@@ -1,4 +1,5 @@
 cache_files
 .env
 *.bak
+*.log
 

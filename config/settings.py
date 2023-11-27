@@ -178,6 +178,13 @@ EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 
+# Настройки для рассылки почты группам
+SERVER_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
+ADMINS = (
+    #('anton', 'ant.on@non-existen-mail.ru'),
+    ('admin', 'grisly@mail.ru'),
+)
+
 
 # Домен сайта для конструирования ссылок для рассылок
 SITE_URL = 'http://127.0.0.1:8000'
@@ -198,4 +205,103 @@ CACHES = {
         'LOCATION': os.path.join(BASE_DIR, 'cache_files'), # Указываем, куда будем сохранять кэшируемые файлы! Не забываем создать папку cache_files внутри папки с manage.py!
         'TIMEOUT': 300,
     }
+}
+
+
+# логирование
+LOGGING = {
+    'version': 1,
+    'disable_existing_logger': False,
+    'loggers': {
+        'news': {
+            'level': 'DEBUG',
+            'handlers': ['console_debug', 'console_warning', 'console_error', 'file_info', 'file_error', 'file_security', 'mail_error'],
+        },
+        'django': {
+            'level': 'ERROR',  # здесь включить DEBUG
+            'handlers': ['console_debug', 'console_warning', 'file_info'],
+        },
+        'django.request': {
+            'level': 'ERROR',
+            'handlers': ['file_error', 'mail_error'],
+        },
+        'django.server': {
+            'level': 'ERROR',
+            'handlers': ['file_error', 'mail_error'],
+        },
+        'django.template': {
+            'level': 'ERROR',
+            'handlers': ['file_error'],
+        },
+        'django.db.backends': {
+            'level': 'ERROR',
+            'handlers': ['file_error'],
+        },
+        'django.security': {
+            'level': 'INFO',
+            'handlers': ['file_security'],
+        },
+    },
+    'handlers': {
+        'console_debug': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'for_debug',
+        },
+        'console_warning': {
+            'level': 'WARNING',
+            'class': 'logging.StreamHandler',
+            'formatter': 'for_warning',
+        },
+        'console_error': {
+            'level': 'ERROR',
+            'class': 'logging.StreamHandler',
+            'formatter': 'for_error',
+        },
+        'file_info': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'formatter': 'for_info_file',
+            'filename': 'log/general.log',
+        },
+        'file_error': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'formatter': 'for_error_file',
+            'filename': 'log/errors.log',
+        },
+        'file_security': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'formatter': 'for_info_file',
+            'filename': 'log/security.log',
+        },
+        'mail_error': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'formatter': 'for_error_file',
+        },
+    },
+    'formatters': {
+        'for_debug': {
+            'format': '%(asctime)s %(levelname)s %(message)s',
+            'datetime': '%Y.%m.%d %H:%M:%S',
+        },
+        'for_warning': {
+            'format': '%(asctime)s %(levelname)s\n\tPathName=[%(pathname)s]\n\tMessage=[%(message)s]',
+            'datetime': '%Y.%m.%d %H:%M:%S',
+        },
+        'for_error': {
+            'format': '%(asctime)s %(levelname)s\n\tPathName=[%(pathname)s]\n\tMessage=[%(message)s]\n\t\t%(exc_info)s',
+            'datetime': '%Y.%m.%d %H:%M:%S',
+        },
+        'for_info_file': {
+            'format': '%(asctime)s %(levelname)s %(module)-12s %(message)s',
+            'datetime': '%Y.%m.%d %H:%M:%S',
+        },
+        'for_error_file': {
+            'format': '%(asctime)s %(levelname)s %(message)s\n\tPathName=[%(pathname)s]\n\t%(exc_info)s',
+            'datetime': '%Y.%m.%d %H:%M:%S',
+        },
+    },
 }

@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import (
     PostListView, PostDetailView, PostSearchView, NewsPostCreate, PostUpdateView, PostDeleteView,
-    ArticlePostCreate, subscriptions
+    ArticlePostCreate, subscriptions, warning_generator, debug_generator, info_generator,
+    critical_generator, error_generator
 )
 
 urlpatterns = [
@@ -15,4 +16,9 @@ urlpatterns = [
     path('article/<int:pk>/edit', PostUpdateView.as_view(), name='article_update'),
     path('article/<int:pk>/delete', PostDeleteView.as_view(), name='article_delete'),
     path('subscriptions/', subscriptions, name='subscriptions'),
+    path('debug/', debug_generator, name='debug_generator'),
+    path('info/', info_generator, name='info_generator'),
+    path('warning/', warning_generator, name='warning_generator'),
+    path('error/', error_generator, name='error_generator'),
+    path('critical/', critical_generator, name='critical_generator'),
 ]

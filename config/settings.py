@@ -217,28 +217,33 @@ LOGGING = {
             'handlers': ['console_debug', 'console_warning', 'console_error', 'file_info', 'file_error', 'file_security', 'mail_error'],
         },
         'django': {
-            'level': 'ERROR',  # здесь включить DEBUG
+            'level': 'DEBUG',  # здесь включить DEBUG
             'handlers': ['console_debug', 'console_warning', 'file_info'],
         },
         'django.request': {
             'level': 'ERROR',
             'handlers': ['file_error', 'mail_error'],
+            'propagate': False,
         },
         'django.server': {
             'level': 'ERROR',
             'handlers': ['file_error', 'mail_error'],
+            'propagate': False,
         },
         'django.template': {
             'level': 'ERROR',
             'handlers': ['file_error'],
+            'propagate': False,
         },
         'django.db.backends': {
             'level': 'ERROR',
             'handlers': ['file_error'],
+            'propagate': False,
         },
         'django.security': {
             'level': 'INFO',
             'handlers': ['file_security'],
+            'propagate': False,
         },
     },
     'handlers': {

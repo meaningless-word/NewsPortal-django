@@ -181,8 +181,7 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 # Настройки для рассылки почты группам
 SERVER_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 ADMINS = (
-    #('anton', 'ant.on@non-existen-mail.ru'),
-    ('admin', 'grisly@mail.ru'),
+    ('anton', 'ant.on@non-existen-mail.ru'),
 )
 
 

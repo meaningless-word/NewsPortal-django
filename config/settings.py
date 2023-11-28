@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure--_&locmu=#ad(oyna294$1-r-_cw*&d8hghg6i&6z^-7=a@d%+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
 
 
 # Application definition
@@ -212,38 +212,39 @@ LOGGING = {
     'version': 1,
     'disable_existing_logger': False,
     'loggers': {
-        'news': {
-            'level': 'DEBUG',
-            'handlers': ['console_debug', 'console_warning', 'console_error', 'file_info', 'file_error', 'file_security', 'mail_error'],
-        },
+        # 'news': {
+        #     'level': 'DEBUG',
+        #     'handlers': ['console_debug', 'console_warning', 'console_error', 'file_info', 'file_error', 'file_security', 'mail_error'],
+        # },
         'django': {
-            'level': 'DEBUG',
+            'level': 'INFO',  # по заданию был DEBUG, но отключен, чтоб не мусорил
             'handlers': ['console_debug', 'console_warning', 'file_info'],
+            'propagate': True,
         },
         'django.request': {
-            'level': 'ERROR',
+            'level': 'INFO',  # вообще, уровень INFO установлен по-умолчанию и на этом этапе сильно не урезается, чтобы хэндлерам было что пофильтровать
             'handlers': ['file_error', 'mail_error'],
-            'propagate': False,
+            'propagate': True,  # чтобы передал событие вышестоящему логгеру - родителю (django)
         },
         'django.server': {
-            'level': 'ERROR',
+            'level': 'INFO',
             'handlers': ['file_error', 'mail_error'],
-            'propagate': False,
+            'propagate': True,
         },
         'django.template': {
-            'level': 'ERROR',
+            'level': 'INFO',
             'handlers': ['file_error'],
-            'propagate': False,
+            'propagate': True,
         },
         'django.db.backends': {
-            'level': 'ERROR',
+            'level': 'INFO',
             'handlers': ['file_error'],
-            'propagate': False,
+            'propagate': True,
         },
         'django.security': {
             'level': 'INFO',
             'handlers': ['file_security'],
-            'propagate': False,
+            'propagate': True,
         },
     },
     'handlers': {
@@ -251,22 +252,26 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'for_debug',
+            'filters': ['require_debug_true'],
         },
         'console_warning': {
             'level': 'WARNING',
             'class': 'logging.StreamHandler',
             'formatter': 'for_warning',
+            'filters': ['require_debug_true'],
         },
         'console_error': {
             'level': 'ERROR',
             'class': 'logging.StreamHandler',
             'formatter': 'for_error',
+            'filters': ['require_debug_true'],
         },
         'file_info': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
             'formatter': 'for_info_file',
             'filename': 'log/general.log',
+            'filters': ['require_debug_false']
         },
         'file_error': {
             'level': 'ERROR',
@@ -284,6 +289,7 @@ LOGGING = {
             'level': 'ERROR',
             'class': 'django.utils.log.AdminEmailHandler',
             'formatter': 'for_error_file',
+            'filters': ['require_debug_false']
         },
     },
     'formatters': {
@@ -306,6 +312,14 @@ LOGGING = {
         'for_error_file': {
             'format': '%(asctime)s %(levelname)s %(message)s\n\tPathName=[%(pathname)s]\n\t%(exc_info)s',
             'datetime': '%Y.%m.%d %H:%M:%S',
+        },
+    },
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
         },
     },
 }
